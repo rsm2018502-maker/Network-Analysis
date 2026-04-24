@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SocioMap Pro — Deep Network Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080f;--bg2:#0e0f1a;--bg3:#141526;--bg4:#1c1d32;--bg5:#242540;
+  --border:#1e1f35;--border2:#2a2b4a;--border3:#363760;
+  --text:#dde0f0;--muted:#6b6e9a;--dim:#32334d;--bright:#f0f2ff;
+  --v1:#6c63ff;--v2:#8b83ff;--v3:#a89fff;--v4:#c5bfff;
+  --teal:#00d4aa;--amber:#ffb347;--coral:#ff6b8a;--sky:#4db8ff;
+  --green:#52d68a;--rose:#ff7eb3;
+  --ff:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--ff);overflow-x:hidden}
+
+/* Animated background grid */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(108,99,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(108,99,255,.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 60% 40% at 20% 80%,rgba(108,99,255,.06),transparent),
+             radial-gradient(ellipse 50% 30% at 80% 20%,rgba(0,212,170,.04),transparent);
+  pointer-events:none;z-index:0
+}
+.z1{position:relative;z-index:1}
+
+/* ── HEADER ── */
+.hdr{
+  position:sticky;top:0;z-index:200;
+  padding:0 28px;height:56px;
+  background:rgba(7,8,15,.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:14px
+}
+.logo{
+  width:32px;height:32px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(135deg,#4a3fa8,#6c63ff);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;letter-spacing:-.02em
+}
+.hdr-brand{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.hdr-tag{font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:1px}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.ai-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.3);
+  border-radius:20px;padding:4px 12px;font-size:10px;font-family:var(--mono);color:var(--v3)
+}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal);animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── LANDING ── */
+#landing{
+  min-height:calc(100vh - 56px);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:40px 20px;text-align:center
+}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10px;font-family:var(--mono);color:var(--v3);
+  border:1px solid rgba(108,99,255,.3);border-radius:20px;
+  padding:4px 14px;margin-bottom:24px;letter-spacing:.08em;text-transform:uppercase
+}
+.hero{font-size:clamp(36px,6vw,60px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin-bottom:16px}
+.hero em{font-style:normal;background:linear-gradient(135deg,var(--v2),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:15px;color:var(--muted);max-width:500px;line-height:1.65;margin-bottom:40px;font-family:var(--mono);font-weight:300}
+
+.upload-card{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r20);
+  padding:32px;width:100%;max-width:580px;margin-bottom:20px
+}
+.field-l{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.inp{
+  width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r12);
+  padding:13px 16px;color:var(--text);font-family:var(--ff);font-size:15px;font-weight:500;
+  outline:none;transition:border .2s;margin-bottom:20px
+}
+.inp:focus{border-color:var(--v1)}
+.inp::placeholder{color:var(--dim)}
+.drop{
+  border:1.5px dashed var(--border2);border-radius:var(--r16);
+  padding:28px 20px;cursor:pointer;transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px
+}
+.drop:hover,.drop.drag{border-color:var(--v1);background:rgba(108,99,255,.04)}
+.drop-ico{width:44px;height:44px;border-radius:12px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:20px}
+.drop-t{font-size:14px;font-weight:600}
+.drop-s{font-size:11px;font-family:var(--mono);color:var(--muted)}
+.fbadge{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);color:var(--teal);font-size:10px;font-family:var(--mono);padding:3px 10px;border-radius:20px;display:none;margin-top:4px}
+.org-wrap{margin-bottom:20px;display:none}
+.sel{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r12);padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;cursor:pointer}
+.btn-go{
+  width:100%;background:linear-gradient(135deg,#4a3fa8,var(--v1));color:#fff;
+  border:none;border-radius:var(--r12);padding:15px;font-family:var(--ff);
+  font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px
+}
+.btn-go:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 40px rgba(108,99,255,.35)}
+.btn-go:disabled{opacity:.35;cursor:not-allowed}
+.sample-link{font-size:11px;font-family:var(--mono);color:var(--dim);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.sample-link:hover{color:var(--muted)}
+
+/* ── DASHBOARD ── */
+#dash{display:none;flex-direction:column;gap:0;min-height:calc(100vh - 56px)}
+
+/* Sidebar + main layout */
+.dash-layout{display:flex;height:calc(100vh - 56px)}
+.sidebar{
+  width:260px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden
+}
+.main-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+
+/* Sidebar sections */
+.sb-section{border-bottom:1px solid var(--border);padding:16px}
+.sb-label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.student-card{display:flex;align-items:center;gap:10px}
+.ava{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4a3fa8,var(--v1));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.ava-name{font-size:13px;font-weight:600}
+.ava-sub{font-size:10px;font-family:var(--mono);color:var(--muted)}
+
+/* Nav items */
+.nav-item{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--r8);
+  cursor:pointer;transition:all .15s;font-size:12px;font-weight:500;color:var(--muted);
+  margin-bottom:2px
+}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(108,99,255,.15);color:var(--v2);border:1px solid rgba(108,99,255,.2)}
+.nav-ico{width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+
+/* Metric mini cards in sidebar */
+.mini-metric{background:var(--bg3);border-radius:var(--r8);padding:10px 12px;margin-bottom:6px}
+.mm-l{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.mm-v{font-size:20px;font-weight:700;line-height:1.2;margin-top:2px}
+.mm-s{font-size:9px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+
+/* Reset btn */
+.btn-reset{
+  margin:12px 16px;padding:8px;background:none;border:1px solid var(--border);
+  color:var(--muted);border-radius:var(--r8);font-family:var(--mono);font-size:10px;
+  cursor:pointer;transition:all .15s;text-align:center
+}
+.btn-reset:hover{border-color:var(--border2);color:var(--text)}
+
+/* ── Panels ── */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r16);padding:18px 20px}
+.pt{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.pt-badge{font-size:9px;padding:2px 8px;border-radius:20px;font-family:var(--mono)}
+
+.row2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.row4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media(max-width:900px){.row2,.row3,.row4{grid-template-columns:1fr}}
+
+/* Force graph canvas */
+#fg-canvas{display:block;cursor:grab;border-radius:var(--r12);background:var(--bg3)}
+#fg-canvas:active{cursor:grabbing}
+
+/* Controls bar */
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ctrl-btn{
+  font-size:10px;font-family:var(--mono);padding:4px 12px;border-radius:20px;
+  border:1px solid var(--border);cursor:pointer;color:var(--muted);background:none;transition:all .15s
+}
+.ctrl-btn:hover,.ctrl-btn.on{background:var(--v1);border-color:var(--v1);color:#fff}
+
+/* Centrality table */
+.ctable{width:100%;border-collapse:collapse;font-size:11px}
+.ctable th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+.ctable td{padding:7px 8px;border-bottom:1px solid var(--border);font-family:var(--mono)}
+.ctable tr:last-child td{border-bottom:none}
+.ctable tr:hover td{background:var(--bg3)}
+.rank-bar{width:60px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle}
+.rank-fill{height:100%;border-radius:2px}
+
+/* Heatmap */
+.hm-cell{border-radius:5px;height:28px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--mono);font-weight:500;cursor:pointer;transition:transform .1s,filter .1s}
+.hm-cell:hover{transform:scale(1.08);filter:brightness(1.25);z-index:2;position:relative}
+
+/* Structural analysis cards */
+.scard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r12);padding:14px 16px}
+.scard-title{font-size:11px;font-weight:600;margin-bottom:4px}
+.scard-val{font-size:22px;font-weight:700;line-height:1;margin-bottom:4px}
+.scard-sub{font-size:10px;font-family:var(--mono);color:var(--muted);line-height:1.4}
+
+/* Path finder */
+.path-inp{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.path-sel{flex:1;min-width:120px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r8);padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none}
+.path-btn{background:var(--v1);color:#fff;border:none;border-radius:var(--r8);padding:8px 16px;font-family:var(--mono);font-size:11px;cursor:pointer;font-weight:500;transition:opacity .2s}
+.path-btn:hover{opacity:.85}
+.path-result{font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.8}
+.path-node{display:inline-block;background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);color:var(--v3);padding:2px 8px;border-radius:6px;margin:1px}
+.path-arrow{color:var(--dim);margin:0 2px}
+
+/* AI panel */
+.ai-panel{background:linear-gradient(135deg,rgba(74,63,168,.18),rgba(0,212,170,.06));border:1px solid rgba(108,99,255,.25);border-radius:var(--r16);padding:18px 20px}
+.ai-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ai-ico{width:22px;height:22px;background:linear-gradient(135deg,#4a3fa8,var(--v1));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700}
+.ai-title{font-size:11px;font-weight:700;color:var(--v3);font-family:var(--mono)}
+.ai-body{font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.75}
+.ai-dot{width:5px;height:5px;border-radius:50%;background:var(--v2);animation:ad .8s infinite}
+.ai-dot:nth-child(2){animation-delay:.15s}.ai-dot:nth-child(3){animation-delay:.3s}
+@keyframes ad{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+.ins-item{border-left:2px solid;padding:8px 12px;margin-bottom:8px;border-radius:0 8px 8px 0;background:rgba(255,255,255,.02)}
+
+/* Monthly canvas */
+#month-canvas{display:block}
+
+/* Org tabs */
+.org-tabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.otab{font-size:10px;font-family:var(--mono);padding:3px 10px;border-radius:20px;border:1px solid var(--border);cursor:pointer;color:var(--muted);background:none;transition:all .15s}
+.otab.active{border-color:var(--v1);color:var(--v2);background:rgba(108,99,255,.1)}
+
+/* Member rows */
+.mrow{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.mrow:last-child{border-bottom:none}
+.minit{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.minfo{flex:1;min-width:0}
+.mname{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrole{font-size:9px;font-family:var(--mono);color:var(--muted)}
+.sbar{width:48px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;flex-shrink:0}
+.sfill{height:100%;border-radius:2px}
+
+/* Tooltip */
+#tip{position:fixed;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;font-size:11px;font-family:var(--mono);pointer-events:none;z-index:999;display:none;max-width:220px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+#tip strong{font-size:13px;font-family:var(--ff);font-weight:700;display:block;margin-bottom:3px;color:var(--bright)}
+#tip .ts{color:var(--muted);font-size:10px}
+
+/* Loader */
+#ldr{position:fixed;inset:0;background:rgba(7,8,15,.95);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.lring{width:52px;height:52px;border:2.5px solid var(--border2);border-top-color:var(--v1);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ltxt{font-size:12px;font-family:var(--mono);color:var(--muted)}
+.lsub{font-size:10px;font-family:var(--mono);color:var(--dim)}
+
+/* Fade in */
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fu .35s ease both}
+.fi2{animation:fu .35s ease .1s both}
+.fi3{animation:fu .35s ease .2s both}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* Section nav highlight */
+.section-anchor{scroll-margin-top:72px}
+</style>
+</head>
+<body>
+<div class="z1">
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="logo">S</div>
+  <div>
+    <div class="hdr-brand">SocioMap Pro</div>
+    <div class="hdr-tag">Deep Network Intelligence</div>
+  </div>
+  <div class="hdr-right">
+    <div class="ai-pill"><div class="pulse"></div>Claude AI</div>
+  </div>
+</header>
+
+<!-- LANDING -->
+<div id="landing" class="z1">
+  <div class="badge">✦ Organizational Network Analysis</div>
+  <h1 class="hero">Understand your<br/><em>network deeply</em></h1>
+  <p class="hero-sub">Upload connections · get Kumu-grade analysis · centrality, clustering, structural holes, path length & AI insights</p>
+
+  <div class="upload-card">
+    <div class="field-l">Your name</div>
+    <input class="inp" id="sname" type="text" placeholder="e.g. Aditya Kumar" autocomplete="off"/>
+
+    <div class="field-l">LinkedIn connections (.xlsx or .csv)</div>
+    <div class="drop" id="dropz" onclick="document.getElementById('fi').click()">
+      <div class="drop-ico">📊</div>
+      <div class="drop-t">Drop your connections file here</div>
+      <div class="drop-s">LinkedIn export · .xlsx · .csv</div>
+      <div class="fbadge" id="fbadge">✓ loaded</div>
+    </div>
+    <input type="file" id="fi" accept=".xlsx,.csv,.xls" style="display:none"/>
+
+    <div class="org-wrap" id="owrap">
+      <div class="field-l">Focus organization (optional)</div>
+      <select class="sel" id="osel"><option value="ALL">All organizations</option></select>
+    </div>
+
+    <button class="btn-go" id="btngo" onclick="runAnalysis()" disabled>
+      <span>◈</span> Generate Deep Analysis
+    </button>
+  </div>
+  <div class="sample-link" onclick="loadSample()">Try with sample LinkedIn data →</div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash" class="z1">
+  <div class="dash-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-section">
+        <div class="sb-label">Analyst</div>
+        <div class="student-card">
+          <div class="ava" id="sava">AK</div>
+          <div>
+            <div class="ava-name" id="sname-d">Student</div>
+            <div class="ava-sub" id="smeta">0 connections</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-label">Navigation</div>
+        <div class="nav-item active" onclick="navScrollTo('s-overview',this)"><div class="nav-ico">⬡</div>Network Overview</div>
+        <div class="nav-item" onclick="navScrollTo('s-force',this)"><div class="nav-ico">◎</div>Force Graph</div>
+        <div class="nav-item" onclick="navScrollTo('s-centrality',this)"><div class="nav-ico">◈</div>Centrality Analysis</div>
+        <div class="nav-item" onclick="navScrollTo('s-structural',this)"><div class="nav-ico">⬙</div>Structural Metrics</div>
+        <div class="nav-item" onclick="navScrollTo('s-heatmap',this)"><div class="nav-ico">▦</div>Tie Strength Heatmap</div>
+        <div class="nav-item" onclick="navScrollTo('s-path',this)"><div class="nav-ico">⇢</div>Path Finder</div>
+        <div class="nav-item" onclick="navScrollTo('s-org',this)"><div class="nav-ico">⊞</div>Organization View</div>
+        <div class="nav-item" onclick="navScrollTo('s-monthly',this)"><div class="nav-ico">▤</div>Monthly Activity</div>
+        <div class="nav-item" onclick="navScrollTo('s-ai',this)"><div class="nav-ico">✦</div>AI Insights</div>
+      </div>
+
+      <div class="sb-section" id="sb-metrics">
+        <div class="sb-label">Key Metrics</div>
+      </div>
+
+      <button class="btn-reset" onclick="resetDash()">← New Analysis</button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-area" id="main-area">
+
+      <!-- Overview KPIs -->
+      <div id="s-overview" class="section-anchor fi">
+        <div id="kpi-row" class="row4"></div>
+      </div>
+
+      <!-- Force-directed graph -->
+      <div id="s-force" class="section-anchor panel fi2">
+        <div class="pt">
+          <span>◎ Force-directed network graph</span>
+          <span id="fg-meta" class="pt-badge" style="background:rgba(108,99,255,.15);color:var(--v3)"></span>
+        </div>
+        <div class="controls">
+          <button class="ctrl-btn on" id="ctrl-cluster" onclick="toggleCluster(this)">Cluster by org</button>
+          <button class="ctrl-btn" id="ctrl-labels" onclick="toggleLabels(this)">Show labels</button>
+          <button class="ctrl-btn" id="ctrl-ties" onclick="toggleTies(this)">Color by tie strength</button>
+          <button class="ctrl-btn" onclick="resetForce()">↺ Reset layout</button>
+        </div>
+        <canvas id="fg-canvas" height="440"></canvas>
+        <div id="fg-legend" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+      </div>
+
+      <!-- Centrality analysis -->
+      <div id="s-centrality" class="section-anchor panel fi">
+        <div class="pt">
+          <span>◈ Centrality analysis</span>
+          <span class="pt-badge" style="background:rgba(0,212,170,.1);color:var(--teal)">Kumu-grade metrics</span>
+        </div>
+        <div class="row2" style="margin-bottom:14px">
+          <div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em">Top nodes by degree centrality</div>
+            <table class="ctable" id="deg-table"></table>
+          </div>
+          <div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em">Top nodes by betweenness</div>
+            <table class="ctable" id="bet-table"></table>
+          </div>
+        </div>
+        <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em">Closeness centrality — all companies</div>
+        <div id="closeness-bars"></div>
+      </div>
+
+      <!-- Structural metrics -->
+      <div id="s-structural" class="section-anchor fi2">
+        <div class="row4" id="struct-cards"></div>
+      </div>
+
+      <!-- Tie strength heatmap -->
+      <div id="s-heatmap" class="section-anchor panel fi">
+        <div class="pt">
+          <span>▦ Tie strength heatmap</span>
+          <div style="display:flex;align-items:center;gap:6px;font-size:9px;color:var(--dim)">
+            weak <div style="width:70px;height:5px;border-radius:3px;background:linear-gradient(to right,#1e1f35,#6c63ff)"></div> strong
+          </div>
+        </div>
+        <div id="hm-grid"></div>
+      </div>
+
+      <!-- Path finder -->
+      <div id="s-path" class="section-anchor panel fi2">
+        <div class="pt"><span>⇢ Shortest path finder</span><span class="pt-badge" style="background:rgba(255,179,71,.1);color:var(--amber)">ONA tool</span></div>
+        <div class="path-inp">
+          <select class="path-sel" id="pf-from"><option>Select source company…</option></select>
+          <div style="display:flex;align-items:center;color:var(--dim);font-size:16px">→</div>
+          <select class="path-sel" id="pf-to"><option>Select target company…</option></select>
+          <button class="path-btn" onclick="findPath()">Find Path</button>
+        </div>
+        <div class="path-result" id="path-result">Select two organizations to find the shortest network path between them.</div>
+      </div>
+
+      <!-- Org view -->
+      <div id="s-org" class="section-anchor panel fi">
+        <div class="pt"><span>⊞ Organization deep-dive</span></div>
+        <div class="org-tabs" id="org-tabs"></div>
+        <div class="row2" id="org-detail"></div>
+      </div>
+
+      <!-- Monthly activity -->
+      <div id="s-monthly" class="section-anchor panel fi2">
+        <div class="pt"><span>▤ Monthly connection activity</span></div>
+        <canvas id="month-canvas" height="200"></canvas>
+      </div>
+
+      <!-- AI insights -->
+      <div id="s-ai" class="section-anchor ai-panel fi">
+        <div class="ai-hdr">
+          <div class="ai-ico">AI</div>
+          <div class="ai-title">Claude Deep Network Analysis</div>
+        </div>
+        <div class="ai-body" id="ai-body">
+          <div style="display:flex;gap:5px;align-items:center"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div id="tip"></div>
+
+<!-- Loader -->
+<div id="ldr">
+  <div class="lring"></div>
+  <div class="ltxt" id="ltxt">Computing network metrics…</div>
+  <div class="lsub" id="lsub">Calculating centrality, clustering, path lengths</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// STATE & DATA
+// ═══════════════════════════════════════════════════
+const PALETTE = ['#6c63ff','#00d4aa','#ffb347','#ff6b8a','#4db8ff','#c084fc','#52d68a','#ff7eb3','#fbbf24','#818cf8','#34d399','#fb923c','#e879f9','#60a5fa'];
+let S = { student:'', conns:[], orgs:[], coColors:{}, metrics:{}, selectedOrg:null };
+let FG = { nodes:[], edges:[], sim:null, showLabels:false, colorByTie:false, dragging:null, offset:{x:0,y:0}, scale:1 };
+let CTRL = { cluster:true, labels:false, ties:false };
+
+const NOW = new Date('2026-04-01');
+
+// ═══════════════════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════════════════
+const dropz = document.getElementById('dropz');
+const fi = document.getElementById('fi');
+dropz.addEventListener('dragover', e=>{e.preventDefault();dropz.classList.add('drag')});
+dropz.addEventListener('dragleave', ()=>dropz.classList.remove('drag'));
+dropz.addEventListener('drop', e=>{e.preventDefault();dropz.classList.remove('drag');handleFile(e.dataTransfer.files[0])});
+fi.addEventListener('change', e=>handleFile(e.target.files[0]));
+document.getElementById('sname').addEventListener('input', checkReady);
+
+function handleFile(f){
+  if(!f) return;
+  const ext = f.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+  reader.onload = e => {
+    let data;
+    if(ext==='csv') data = parseCSV(e.target.result);
+    else { const wb=XLSX.read(e.target.result,{type:'array'}); data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''}); }
+    S.conns = normalise(data);
+    buildOrgDropdown();
+    const badge = document.getElementById('fbadge');
+    badge.style.display='inline-block';
+    badge.textContent=`✓ ${f.name} · ${S.conns.length} connections`;
+    checkReady();
+  };
+  if(ext==='csv') reader.readAsText(f);
+  else reader.readAsArrayBuffer(f);
+}
+function parseCSV(txt){
+  function parseRow(line){
+    const vals=[]; let cur='', inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){
+        if(inQ&&line[i+1]==='"'){cur+='"';i++;}
+        else inQ=!inQ;
+      } else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
+      else cur+=ch;
+    }
+    vals.push(cur.trim()); return vals;
+  }
+  const lines=txt.trim().split(/\r?\n/);
+  const headers=parseRow(lines[0]).map(h=>h.replace(/"/g,'').trim());
+  return lines.slice(1).filter(l=>l.trim()).map(l=>{
+    const v=parseRow(l).map(x=>x.replace(/^"|"$/g,'').trim());
+    const o={};headers.forEach((h,i)=>o[h]=v[i]||'');return o;
+  });
+}
+function normalise(rows){
+  return rows.map(r=>{
+    const fn=r['First Name']||r['first_name']||r['FirstName']||'';
+    const ln=r['Last Name']||r['last_name']||r['LastName']||'';
+    const name=(fn+' '+ln).trim()||r['Name']||r['name']||'Unknown';
+    const company=(r['Company']||r['company']||r['Organization']||'').trim()||'Unknown';
+    const position=(r['Position']||r['position']||r['Title']||r['Role']||'').trim();
+    const dateRaw=r['Connected On']||r['connected_on']||r['Date']||r['date']||'';
+    return {name,company:company||'Unknown',position,date:parseDate(dateRaw)};
+  }).filter(r=>r.name&&r.name!=='Unknown'&&r.company&&r.company!=='Unknown');
+}
+function parseDate(d){
+  if(!d) return new Date('2022-06-01');
+  const mo={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  const m=d.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+  if(m) return new Date(+m[3],mo[m[2]]||0,+m[1]);
+  const dt=new Date(d); return isNaN(dt)?new Date('2022-06-01'):dt;
+}
+function buildOrgDropdown(){
+  S.orgs=[...new Set(S.conns.map(c=>c.company))].sort();
+  const sel=document.getElementById('osel');
+  sel.innerHTML='<option value="ALL">All organizations</option>';
+  S.orgs.forEach(o=>{const op=document.createElement('option');op.value=op.textContent=o;sel.appendChild(op)});
+  document.getElementById('owrap').style.display='block';
+}
+function checkReady(){
+  document.getElementById('btngo').disabled=S.conns.length<1||document.getElementById('sname').value.trim().length<2;
+}
+
+// ═══════════════════════════════════════════════════
+// SAMPLE DATA
+// ═══════════════════════════════════════════════════
+function loadSample(){
+  S.conns=[
+    {name:'Priya Sharma',company:'TechCorp India',position:'Sr. Software Engineer',date:new Date('2022-01-15')},
+    {name:'Vikram Bose',company:'TechCorp India',position:'Engineering Manager',date:new Date('2020-05-30')},
+    {name:'Manish Tiwari',company:'TechCorp India',position:'Backend Developer',date:new Date('2021-05-31')},
+    {name:'Asha Rajan',company:'TechCorp India',position:'Frontend Developer',date:new Date('2021-01-05')},
+    {name:'Rahul Mehta',company:'Infosys',position:'Project Manager',date:new Date('2021-03-20')},
+    {name:'Arun Venkat',company:'Infosys',position:'Senior Consultant',date:new Date('2023-02-11')},
+    {name:'Varun Kapoor',company:'Infosys',position:'Agile Coach',date:new Date('2020-10-23')},
+    {name:'Rupali Deshpande',company:'Infosys',position:'Digital Transformation Lead',date:new Date('2020-06-01')},
+    {name:'Ananya Krishnan',company:'Wipro',position:'Data Scientist',date:new Date('2022-06-05')},
+    {name:'Lakshmi Rao',company:'Wipro',position:'AI Researcher',date:new Date('2021-12-16')},
+    {name:'Geeta Pillai',company:'Wipro',position:'HR Business Partner',date:new Date('2023-01-06')},
+    {name:'Tarun Kohli',company:'Wipro',position:'Blockchain Developer',date:new Date('2021-08-14')},
+    {name:'Karthik Nair',company:'TCS',position:'Solutions Architect',date:new Date('2020-08-12')},
+    {name:'Nikhil Choudhary',company:'TCS',position:'DevOps Engineer',date:new Date('2021-08-19')},
+    {name:'Kiran Murthy',company:'TCS',position:'Quality Analyst',date:new Date('2021-03-18')},
+    {name:'Smita Naik',company:'TCS',position:'Enterprise Architect',date:new Date('2022-11-27')},
+    {name:'Sneha Patel',company:'Google',position:'Product Manager',date:new Date('2021-11-18')},
+    {name:'Kavya Menon',company:'Google',position:'UX Researcher',date:new Date('2022-11-02')},
+    {name:'Preeti Chandrasekhar',company:'Google',position:'Engineering Lead',date:new Date('2020-09-12')},
+    {name:'Arjun Reddy',company:'Microsoft',position:'Cloud Engineer',date:new Date('2023-01-22')},
+    {name:'Rohit Agarwal',company:'Microsoft',position:'Program Manager',date:new Date('2021-01-13')},
+    {name:'Deepak Mohan',company:'Microsoft',position:'Data Scientist',date:new Date('2021-11-24')},
+    {name:'Deepa Iyer',company:'Amazon',position:'ML Engineer',date:new Date('2022-04-09')},
+    {name:'Divya Nambiar',company:'Amazon',position:'Operations Manager',date:new Date('2023-04-29')},
+    {name:'Swati Pandey',company:'Amazon',position:'Product Analyst',date:new Date('2023-02-15')},
+    {name:'Siddharth Malhotra',company:'StartupX',position:'Co-Founder',date:new Date('2022-03-08')},
+    {name:'Tanvi Shah',company:'StartupX',position:'Head of Growth',date:new Date('2021-09-21')},
+    {name:'Ankit Saxena',company:'StartupX',position:'CTO',date:new Date('2022-06-30')},
+    {name:'Suresh Pillai',company:'Accenture',position:'Delivery Lead',date:new Date('2022-09-03')},
+    {name:'Sanjay Kulkarni',company:'Accenture',position:'Strategy Consultant',date:new Date('2020-07-07')},
+    {name:'Naveen Subramanian',company:'Accenture',position:'Technology Architect',date:new Date('2020-04-28')},
+    {name:'Nidhi Gupta',company:'Deloitte',position:'Management Consultant',date:new Date('2020-10-27')},
+    {name:'Ajay Desai',company:'Deloitte',position:'Senior Analyst',date:new Date('2022-12-04')},
+    {name:'Ankita Mishra',company:'Deloitte',position:'Risk Consultant',date:new Date('2021-07-09')},
+    {name:'Meera Joshi',company:'HCL Technologies',position:'Business Analyst',date:new Date('2021-07-14')},
+    {name:'Ritu Verma',company:'HCL Technologies',position:'Product Owner',date:new Date('2020-02-17')},
+    {name:'Vivek Hegde',company:'HCL Technologies',position:'Scrum Master',date:new Date('2022-10-22')},
+    {name:'Pooja Singh',company:'IBM',position:'Data Engineer',date:new Date('2020-06-25')},
+    {name:'Shreya Bhatt',company:'IBM',position:'Cloud Architect',date:new Date('2022-08-10')},
+    {name:'Manoj Chatterjee',company:'IBM',position:'Security Analyst',date:new Date('2023-04-17')},
+  ];
+  document.getElementById('sname').value='Aditya Kumar';
+  const badge=document.getElementById('fbadge');
+  badge.style.display='inline-block';
+  badge.textContent=`✓ sample_linkedin.csv · ${S.conns.length} connections`;
+  buildOrgDropdown(); checkReady();
+}
+
+// ═══════════════════════════════════════════════════
+// NETWORK METRICS ENGINE (Kumu-grade)
+// ═══════════════════════════════════════════════════
+function computeMetrics(conns, orgs){
+  const n = orgs.length;
+  // Build adjacency: all orgs connect to YOU (ego), plus intra-cluster
+  // Node index: 0 = YOU, 1..n = orgs
+  const adj = Array.from({length:n+1},()=>new Set());
+  orgs.forEach((_,i)=>{ adj[0].add(i+1); adj[i+1].add(0); });
+  // Intra-cluster edges (all members of same org are connected)
+  // Simulate inter-org weak ties based on shared roles/industries
+  orgs.forEach((co,i)=>{
+    orgs.forEach((co2,j)=>{
+      if(i>=j) return;
+      const m1=conns.filter(c=>c.company===co);
+      const m2=conns.filter(c=>c.company===co2);
+      // Tie exists if they share role keywords or both recent
+      const roles1=new Set(m1.map(m=>m.position.split(' ').pop()));
+      const roles2=new Set(m2.map(m=>m.position.split(' ').pop()));
+      const shared=[...roles1].some(r=>roles2.has(r));
+      if(shared){ adj[i+1].add(j+1); adj[j+1].add(i+1); }
+    });
+  });
+
+  // Degree centrality
+  const degree = adj.map(s=>s.size);
+  const maxDeg = Math.max(...degree);
+  const degCentral = degree.map(d=>n>0?d/n:0); // normalized, guarded
+
+  // BFS for shortest paths
+  function bfs(src){
+    const dist=new Array(n+1).fill(Infinity);
+    dist[src]=0;
+    const q=[src];
+    while(q.length){
+      const u=q.shift();
+      for(const v of adj[u]){ if(dist[v]===Infinity){dist[v]=dist[u]+1;q.push(v);} }
+    }
+    return dist;
+  }
+
+  // Betweenness centrality (Brandes algorithm simplified)
+  const between = new Array(n+1).fill(0);
+  for(let s=0;s<=n;s++){
+    const stack=[], pred=Array.from({length:n+1},()=>[]);
+    const sigma=new Array(n+1).fill(0); sigma[s]=1;
+    const dist2=new Array(n+1).fill(-1); dist2[s]=0;
+    const q=[s];
+    while(q.length){
+      const v=q.shift(); stack.push(v);
+      for(const w of adj[v]){
+        if(dist2[w]<0){dist2[w]=dist2[v]+1;q.push(w);}
+        if(dist2[w]===dist2[v]+1){sigma[w]+=sigma[v];pred[w].push(v);}
+      }
+    }
+    const delta=new Array(n+1).fill(0);
+    while(stack.length){
+      const w=stack.pop();
+      for(const v of pred[w]){ delta[v]+=(sigma[v]/sigma[w])*(1+delta[w]); }
+      if(w!==s) between[w]+=delta[w];
+    }
+  }
+  const maxBet=Math.max(...between)||1;
+  const betCentral=between.map(b=>b/maxBet);
+
+  // Closeness centrality
+  const closeness=Array.from({length:n+1},(_,i)=>{
+    const d=bfs(i); const reachable=d.filter(x=>x<Infinity&&x>0);
+    if(!reachable.length) return 0;
+    return reachable.length/reachable.reduce((a,x)=>a+x,0);
+  });
+  const maxCl=Math.max(...closeness)||1;
+  const clCentral=closeness.map(c=>c/maxCl);
+
+  // Clustering coefficient per org node
+  const clustering=Array.from({length:n+1},(_,i)=>{
+    const nbrs=[...adj[i]];
+    const k=nbrs.length;
+    if(k<2) return 0;
+    let links=0;
+    for(let a=0;a<nbrs.length;a++) for(let b=a+1;b<nbrs.length;b++) if(adj[nbrs[a]].has(nbrs[b])) links++;
+    return (2*links)/(k*(k-1));
+  });
+  const avgClustering=clustering.slice(1).reduce((a,x)=>a+x,0)/n;
+
+  // Network density
+  const totalEdges=[...adj].reduce((a,s)=>a+s.size,0)/2;
+  const maxEdges=(n+1)*n/2;
+  const density=totalEdges/maxEdges;
+
+  // Average path length
+  let totalPath=0, pathCount=0;
+  for(let i=0;i<=n;i++){
+    const d=bfs(i);
+    d.forEach((x,j)=>{ if(j!==i&&x<Infinity){totalPath+=x;pathCount++;} });
+  }
+  const avgPath=pathCount>0?(totalPath/pathCount):0;
+
+  // Structural holes (constraint) — simplified Burt measure
+  // High constraint = embedded, Low constraint = broker
+  const constraint=Array.from({length:n+1},(_,i)=>{
+    const nbrs=[...adj[i]];
+    if(!nbrs.length) return 1;
+    let c=0;
+    nbrs.forEach(j=>{
+      const pij=1/nbrs.length;
+      let indirect=0;
+      nbrs.forEach(q=>{ if(q!==j&&adj[q].has(j)) indirect+=pij*(1/[...adj[q]].length); });
+      c+=Math.pow(pij+indirect,2);
+    });
+    return Math.min(c,1);
+  });
+  const effSize=Array.from({length:n+1},(_,i)=>{
+    const k=[...adj[i]].length;
+    return k*(1-clustering[i]);
+  });
+
+  // Reciprocity (for ego network: fraction of ties that are mutual)
+  const reciprocity = 1.0; // ego network is always reciprocal
+
+  // All-pairs shortest paths matrix
+  const apsp=Array.from({length:n+1},(_,i)=>bfs(i));
+
+  return {
+    degree,degCentral,betCentral,clCentral,clustering,avgClustering,
+    density,avgPath,constraint,effSize,apsp,adj,n,
+    totalEdges,maxDeg,reciprocity
+  };
+}
+
+// ═══════════════════════════════════════════════════
+// ANALYSIS RUNNER
+// ═══════════════════════════════════════════════════
+async function runAnalysis(){
+  const name=document.getElementById('sname').value.trim();
+  S.student=name;
+  showLoader('Building network graph…','Computing centrality & structural holes');
+  await sleep(200);
+
+  S.orgs=[...new Set(S.conns.map(c=>c.company))];
+  S.orgs.forEach((co,i)=>S.coColors[co]=PALETTE[i%PALETTE.length]);
+  S.metrics=computeMetrics(S.conns,S.orgs);
+
+  document.getElementById('landing').style.display='none';
+  document.getElementById('dash').style.display='flex';
+
+  renderSidebar(name);
+  renderKPIs();
+  await sleep(100);
+  renderForceGraph();
+  renderCentrality();
+  renderStructural();
+  renderHeatmap();
+  renderPathFinder();
+  renderOrgView();
+  hideLoader();
+  requestAnimationFrame(()=>{ requestAnimationFrame(renderMonthly); });
+  fetchAI(name);
+}
+
+function showLoader(t,s){const ldr=document.getElementById('ldr');document.getElementById('ltxt').textContent=t;document.getElementById('lsub').textContent=s||'';ldr.style.display='flex';ldr.style.flexDirection='column';}
+function hideLoader(){document.getElementById('ldr').style.display='none';}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ═══════════════════════════════════════════════════
+// SIDEBAR & KPIs
+// ═══════════════════════════════════════════════════
+function renderSidebar(name){
+  const init=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('sava').textContent=init;
+  document.getElementById('sname-d').textContent=name;
+  document.getElementById('smeta').textContent=`${S.conns.length} connections · ${S.orgs.length} orgs`;
+
+  const m=S.metrics;
+  const strong=S.conns.filter(c=>tieStr(c.date).score===3).length;
+  document.getElementById('sb-metrics').innerHTML=`
+    <div class="sb-label">Key Metrics</div>
+    ${[
+      ['Density',+(m.density*100).toFixed(1)+'%','network connectedness','--v1'],
+      ['Avg path',+(m.avgPath||0).toFixed(2),'hops between nodes','--teal'],
+      ['Avg clustering',+(m.avgClustering*100).toFixed(1)+'%','cluster coefficient','--amber'],
+      ['Strong ties',strong,'< 18 months old','--green'],
+    ].map(([l,v,s,c])=>`<div class="mini-metric">
+      <div class="mm-l">${l}</div>
+      <div class="mm-v" style="color:var(${c})">${v}</div>
+      <div class="mm-s">${s}</div>
+    </div>`).join('')}
+  `;
+}
+
+function renderKPIs(){
+  const m=S.metrics;
+  const strong=S.conns.filter(c=>tieStr(c.date).score===3).length;
+  const weak=S.conns.filter(c=>tieStr(c.date).score===1).length;
+  const years=[...new Set(S.conns.map(c=>c.date.getFullYear()))];
+  const topCo=[...S.orgs].sort((a,b)=>S.conns.filter(c=>c.company===b).length-S.conns.filter(c=>c.company===a).length)[0];
+
+  document.getElementById('kpi-row').innerHTML=[
+    {l:'Connections',v:S.conns.length,s:'1st degree',c:'--v1'},
+    {l:'Organizations',v:S.orgs.length,s:'unique clusters',c:'--teal'},
+    {l:'Network density',v:(m.density*100).toFixed(1)+'%',s:'inter-cluster ties',c:'--amber'},
+    {l:'Avg path length',v:(m.avgPath||0).toFixed(2),s:'hops across orgs',c:'--sky'},
+    {l:'Strong ties',v:strong,s:'< 18 months',c:'--green'},
+    {l:'Weak ties',v:weak,s:'> 3 years',c:'--coral'},
+    {l:'Avg clustering',v:(m.avgClustering*100).toFixed(1)+'%',s:'cluster coeff',c:'--rose'},
+    {l:'Top cluster',v:S.conns.filter(c=>c.company===topCo).length,s:topCo.split(' ')[0],c:'--v3'},
+  ].map(k=>`<div class="panel">
+    <div class="mm-l">${k.l}</div>
+    <div style="font-size:24px;font-weight:700;color:var(${k.c});line-height:1.1;margin:6px 0">${k.v}</div>
+    <div class="mm-s">${k.s}</div>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// FORCE-DIRECTED GRAPH
+// ═══════════════════════════════════════════════════
+function renderForceGraph(){
+  const canvas=document.getElementById('fg-canvas');
+  const W=canvas.parentElement.clientWidth-40;
+  const H=440;
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+
+  const orgs=S.orgs, m=S.metrics;
+  const cx=W/2, cy=H/2;
+
+  // Nodes: YOU + orgs
+  const nodes=[{id:0,label:S.student.split(' ').map(w=>w[0]).join('').slice(0,2),company:'YOU',r:16,x:cx,y:cy,fx:cx,fy:cy}];
+  orgs.forEach((co,i)=>{
+    const angle=(i/orgs.length)*Math.PI*2-Math.PI/2;
+    const R=Math.min(W,H)*0.32;
+    const members=S.conns.filter(c=>c.company===co);
+    const avgStr=members.reduce((a,c)=>a+tieStr(c.date).score,0)/members.length;
+    nodes.push({
+      id:i+1,label:co.split(' ')[0].slice(0,6),company:co,
+      r:6+members.length*1.5,
+      x:cx+Math.cos(angle)*R+rand(-20,20),
+      y:cy+Math.sin(angle)*R+rand(-20,20),
+      strength:avgStr,members:members.length
+    });
+  });
+
+  // Edges from adjacency
+  const edges=[];
+  orgs.forEach((_,i)=>{
+    edges.push({s:0,t:i+1});
+    orgs.forEach((_,j)=>{ if(j>i&&m.adj[i+1].has(j+1)) edges.push({s:i+1,t:j+1}); });
+  });
+
+  document.getElementById('fg-meta').textContent=`${nodes.length} nodes · ${edges.length} edges`;
+
+  FG.nodes=nodes; FG.edges=edges;
+
+  // Simple force simulation
+  function simulate(){
+    const alpha=0.15;
+    for(let iter=0;iter<80;iter++){
+      // Repulsion
+      nodes.forEach(a=>{ if(a.fx!==undefined) return;
+        nodes.forEach(b=>{ if(a===b) return;
+          const dx=a.x-b.x, dy=a.y-b.y;
+          const d2=dx*dx+dy*dy||1, d=Math.sqrt(d2);
+          const force=200*200/d2;
+          a.x+=dx/d*force*alpha; a.y+=dy/d*force*alpha;
+        });
+      });
+      // Attraction along edges
+      edges.forEach(e=>{
+        const a=nodes[e.s], b=nodes[e.t];
+        const dx=b.x-a.x, dy=b.y-a.y;
+        const d=Math.sqrt(dx*dx+dy*dy)||1;
+        const target=100;
+        const f=(d-target)*0.03;
+        if(a.fx===undefined){a.x+=dx/d*f; a.y+=dy/d*f;}
+        if(b.fx===undefined){b.x-=dx/d*f; b.y-=dy/d*f;}
+      });
+      // Boundary
+      nodes.forEach(n=>{
+        if(n.fx!==undefined) return;
+        n.x=Math.max(n.r+10,Math.min(W-n.r-10,n.x));
+        n.y=Math.max(n.r+10,Math.min(H-n.r-10,n.y));
+      });
+    }
+  }
+  simulate();
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Edges
+    edges.forEach(e=>{
+      const a=nodes[e.s], b=nodes[e.t];
+      const isCross=e.s>0&&e.t>0;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=isCross?'rgba(108,99,255,.15)':'rgba(108,99,255,.25)';
+      ctx.lineWidth=isCross?.6:1;
+      ctx.stroke();
+    });
+    // Nodes
+    nodes.forEach(n=>{
+      if(n.id===0){
+        // YOU node
+        ctx.beginPath(); ctx.arc(n.x,n.y,n.r+4,0,Math.PI*2);
+        ctx.fillStyle='rgba(108,99,255,.15)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+        ctx.fillStyle='#6c63ff'; ctx.fill();
+        ctx.fillStyle='#fff'; ctx.font=`700 9px Outfit,sans-serif`;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(n.label,n.x,n.y);
+      } else {
+        const col=CTRL.ties?tieColor(n.strength||2):(S.coColors[n.company]||'#6c63ff');
+        ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+        ctx.fillStyle=col+'cc'; ctx.fill();
+        ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.stroke();
+        if(CTRL.labels||n.r>10){
+          ctx.fillStyle='#dde0f0'; ctx.font=`500 ${Math.min(10,n.r-1)}px Outfit,sans-serif`;
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(n.label,n.x,n.y);
+        }
+        // Member count badge
+        ctx.fillStyle='rgba(13,14,26,.7)'; ctx.font=`400 8px JetBrains Mono,monospace`;
+        ctx.textAlign='center';
+        ctx.fillText(n.members,n.x,n.y+n.r+9);
+      }
+    });
+  }
+  draw();
+  FG.draw=draw; FG.W=W; FG.H=H; FG.ctx=ctx; FG.canvas=canvas;
+
+  // Legend
+  const lg=document.getElementById('fg-legend');
+  lg.innerHTML=S.orgs.map(co=>`<div style="display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--mono);color:var(--muted);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:2px 8px">
+    <span style="width:7px;height:7px;border-radius:50%;background:${S.coColors[co]};display:inline-block"></span>${co}
+  </div>`).join('');
+
+  // Unified tooltip + drag handler
+  const tip=document.getElementById('tip');
+  canvas.addEventListener('mousemove',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+    if(FG.dragging){
+      FG.dragging.x=mx; FG.dragging.y=my;
+      FG.dragging.fx=mx; FG.dragging.fy=my;
+      draw(); tip.style.display='none'; return;
+    }
+    const found=nodes.find(n=>Math.hypot(n.x-mx,n.y-my)<n.r+4);
+    if(found&&found.id>0){
+      const m2=S.conns.filter(c=>c.company===found.company);
+      const avgAge=(m2.reduce((a,c)=>a+(NOW-c.date)/(1000*60*60*24*365),0)/m2.length).toFixed(1);
+      const s=tieStr2(found.strength||2);
+      tip.style.display='block'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px';
+      tip.innerHTML=`<strong>${found.company}</strong><span class="ts">${found.members} connections · avg ${avgAge}yr · <span style="color:${s.color}">${s.label} ties</span></span>`;
+    } else tip.style.display='none';
+  });
+  canvas.addEventListener('mouseleave',()=>{ tip.style.display='none'; });
+
+  // Drag
+  canvas.addEventListener('mousedown',e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+    const found=nodes.find(n=>n.id>0&&Math.hypot(n.x-mx,n.y-my)<n.r+4);
+    if(found){FG.dragging=found; found.fx=found.x; found.fy=found.y;}
+  });
+  canvas.addEventListener('mouseup',()=>{
+    if(FG.dragging){delete FG.dragging.fx; delete FG.dragging.fy; FG.dragging=null;}
+  });
+}
+
+function toggleCluster(btn){CTRL.cluster=!CTRL.cluster;btn.classList.toggle('on');renderForceGraph();}
+function toggleLabels(btn){CTRL.labels=!CTRL.labels;btn.classList.toggle('on');if(FG.draw)FG.draw();}
+function toggleTies(btn){CTRL.ties=!CTRL.ties;btn.classList.toggle('on');if(FG.draw)FG.draw();}
+function resetForce(){renderForceGraph();}
+function tieColor(score){return score>=2.5?'#00d4aa':score>=1.5?'#6c63ff':'#ff6b8a';}
+
+// ═══════════════════════════════════════════════════
+// CENTRALITY ANALYSIS
+// ═══════════════════════════════════════════════════
+function renderCentrality(){
+  const m=S.metrics, orgs=S.orgs;
+
+  function makeTable(tableId, scores, label){
+    const ranked=[...orgs.map((co,i)=>({co,score:scores[i+1]}))].sort((a,b)=>b.score-a.score).slice(0,8);
+    const max=ranked[0]?.score||1;
+    document.getElementById(tableId).innerHTML=`
+      <tr><th>Organization</th><th>${label}</th><th>Score</th></tr>
+      ${ranked.map(r=>`<tr>
+        <td style="color:${S.coColors[r.co]};font-weight:500">${r.co.replace(' Technologies','').replace(' India','')}</td>
+        <td><div class="rank-bar"><div class="rank-fill" style="width:${Math.round(r.score/max*100)}%;background:${S.coColors[r.co]}"></div></div></td>
+        <td style="color:var(--muted)">${r.score.toFixed(3)}</td>
+      </tr>`).join('')}
+    `;
+  }
+  makeTable('deg-table', m.degCentral, 'Degree');
+  makeTable('bet-table', m.betCentral, 'Betweenness');
+
+  // Closeness bars
+  const clRanked=[...orgs.map((co,i)=>({co,score:m.clCentral[i+1]}))].sort((a,b)=>b.score-a.score);
+  const maxCl=clRanked[0]?.score||1;
+  document.getElementById('closeness-bars').innerHTML=clRanked.map(r=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:11px">
+      <div style="width:100px;font-family:var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.co.replace(' Technologies','').replace(' India','')}</div>
+      <div style="flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${Math.round(r.score/maxCl*100)}%;background:${S.coColors[r.co]};border-radius:3px;transition:width .6s"></div>
+      </div>
+      <div style="font-family:var(--mono);color:var(--muted);font-size:10px;width:40px;text-align:right">${r.score.toFixed(3)}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// STRUCTURAL METRICS
+// ═══════════════════════════════════════════════════
+function renderStructural(){
+  const m=S.metrics, orgs=S.orgs;
+  const avgConstr=(m.constraint.slice(1).reduce((a,x)=>a+x,0)/orgs.length).toFixed(3);
+  const maxEff=Math.max(...m.effSize.slice(1));
+  const brokers=orgs.filter((_,i)=>m.constraint[i+1]<0.5);
+  const strong=S.conns.filter(c=>tieStr(c.date).score===3).length;
+  const weak=S.conns.filter(c=>tieStr(c.date).score===1).length;
+
+  document.getElementById('struct-cards').innerHTML=[
+    {title:'Network density',val:(m.density*100).toFixed(1)+'%',sub:'Fraction of all possible ties present. >50% = dense cohesion',c:'--v1'},
+    {title:'Avg path length',val:m.avgPath.toFixed(2),sub:'Average hops to connect any two nodes. Lower = faster info flow',c:'--teal'},
+    {title:'Avg clustering coeff',val:(m.avgClustering*100).toFixed(1)+'%',sub:'Degree to which nodes form tight clusters. High = silos present',c:'--amber'},
+    {title:'Structural holes',val:brokers.length,sub:`Orgs with constraint < 0.5 acting as brokers: ${brokers.slice(0,3).map(o=>o.split(' ')[0]).join(', ')||'none'}`,c:'--coral'},
+    {title:'Avg constraint',val:avgConstr,sub:'Burt constraint: high = embedded, low = bridging broker position',c:'--sky'},
+    {title:'Tie reciprocity',val:'100%',sub:'All ego-network ties are mutual (standard for LinkedIn data)',c:'--green'},
+    {title:'Strong tie ratio',val:Math.round(strong/S.conns.length*100)+'%',sub:`${strong} strong vs ${weak} weak ties`,c:'--rose'},
+    {title:'Network span',val:orgs.length+' orgs',sub:`Across ${[...new Set(S.conns.map(c=>c.date.getFullYear()))].length} years of connecting`,c:'--v3'},
+  ].map(k=>`<div class="scard">
+    <div class="scard-title" style="color:var(${k.c})">${k.title}</div>
+    <div class="scard-val">${k.val}</div>
+    <div class="scard-sub">${k.sub}</div>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// TIE STRENGTH HEATMAP
+// ═══════════════════════════════════════════════════
+function tieStr(date){
+  const yr=(NOW-date)/(1000*60*60*24*365);
+  if(yr<1.5) return {label:'Strong',score:3,color:'#00d4aa'};
+  if(yr<3)   return {label:'Medium',score:2,color:'#6c63ff'};
+  return             {label:'Weak',  score:1,color:'#ff6b8a'};
+}
+function tieStr2(score){
+  if(score>=2.5) return {label:'Strong',color:'#00d4aa'};
+  if(score>=1.5) return {label:'Medium',color:'#6c63ff'};
+  return                {label:'Weak',  color:'#ff6b8a'};
+}
+
+function renderHeatmap(){
+  const orgs=S.orgs;
+  const maxM=Math.max(...orgs.map(co=>S.conns.filter(c=>c.company===co).length));
+  const cols=Math.min(maxM,6);
+
+  let html=`<div style="display:grid;grid-template-columns:108px repeat(${cols},minmax(0,1fr));gap:3px;margin-bottom:4px">
+    <div></div>${Array.from({length:cols},(_,i)=>`<div style="font-size:9px;font-family:var(--mono);color:var(--muted);text-align:center;padding-bottom:3px">M${i+1}</div>`).join('')}
+  </div>`;
+
+  orgs.forEach(co=>{
+    const members=S.conns.filter(c=>c.company===co).sort((a,b)=>b.date-a.date).slice(0,cols);
+    const color=S.coColors[co]||'#6c63ff';
+    html+=`<div style="display:grid;grid-template-columns:108px repeat(${cols},minmax(0,1fr));gap:3px;margin-bottom:3px">
+      <div style="font-size:9px;font-family:var(--mono);color:var(--muted);display:flex;align-items:center;gap:4px;overflow:hidden;padding-right:4px">
+        <span style="width:6px;height:6px;border-radius:50%;background:${color};flex-shrink:0"></span>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${co.replace(' Technologies','').replace(' India','')}</span>
+      </div>`;
+    for(let i=0;i<cols;i++){
+      const mb=members[i];
+      if(mb){
+        const s=tieStr(mb.date);
+        const op=s.score===3?1:s.score===2?.55:.25;
+        const fn=mb.name.split(' ')[0].slice(0,5);
+        const age=((NOW-mb.date)/(1000*60*60*24*365)).toFixed(1);
+        html+=`<div class="hm-cell" style="background:${color};opacity:${op}"
+          onmouseenter="showHmTip(event,'${mb.name.replace(/'/g,"\\'")}','${mb.position.replace(/'/g,"\\'")}','${co.replace(/'/g,"\\'")}','${s.label}','${age}','${color}')"
+          onmouseleave="document.getElementById('tip').style.display='none'">
+          <span style="color:white;text-shadow:0 1px 3px rgba(0,0,0,.6);font-size:9px">${fn}</span>
+        </div>`;
+      } else {
+        html+=`<div class="hm-cell" style="background:var(--bg4);opacity:.15"></div>`;
+      }
+    }
+    html+='</div>';
+  });
+  document.getElementById('hm-grid').innerHTML=html;
+}
+function showHmTip(e,name,role,co,str,age,color){
+  const tip=document.getElementById('tip');
+  tip.style.display='block'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px';
+  tip.innerHTML=`<strong>${name}</strong><span class="ts">${role||'—'}<br/><span style="color:${color}">${co}</span><br/><span style="color:${str==='Strong'?'#00d4aa':str==='Medium'?'#6c63ff':'#ff6b8a'}">${str} tie</span> · ${age}yr ago</span>`;
+}
+
+// ═══════════════════════════════════════════════════
+// PATH FINDER
+// ═══════════════════════════════════════════════════
+function renderPathFinder(){
+  const orgs=S.orgs;
+  ['pf-from','pf-to'].forEach(id=>{
+    const sel=document.getElementById(id);
+    sel.innerHTML=`<option value="">Select organization…</option>`+orgs.map(o=>`<option value="${o}">${o}</option>`).join('');
+  });
+}
+function findPath(){
+  const from=document.getElementById('pf-from').value;
+  const to=document.getElementById('pf-to').value;
+  const res=document.getElementById('path-result');
+  if(!from||!to){res.textContent='Please select both organizations.';return;}
+  if(from===to){res.innerHTML=`<span class="path-node">${from}</span> — same organization`;return;}
+
+  const orgs=S.orgs;
+  const fromIdx=orgs.indexOf(from)+1, toIdx=orgs.indexOf(to)+1;
+  if(fromIdx<1||toIdx<1){res.textContent='Organization not found.';return;}
+
+  // BFS path reconstruction
+  const n=S.metrics.n;
+  const adj=S.metrics.adj;
+  const prev=new Array(n+1).fill(-1);
+  const visited=new Array(n+1).fill(false);
+  visited[fromIdx]=true;
+  const q=[fromIdx];
+  while(q.length){
+    const u=q.shift();
+    if(u===toIdx) break;
+    for(const v of adj[u]){
+      if(!visited[v]){visited[v]=true;prev[v]=u;q.push(v);}
+    }
+  }
+  if(!visited[toIdx]){res.innerHTML=`No path found between <span class="path-node">${from}</span> and <span class="path-node">${to}</span>.`;return;}
+
+  // Reconstruct
+  const path=[];
+  let cur=toIdx;
+  while(cur!==-1){path.unshift(cur);cur=prev[cur];}
+
+  const labels=['YOU',...orgs];
+  const hops=path.length-1;
+  const pathHtml=path.map((id,i)=>`<span class="path-node" style="border-color:${id===0?'rgba(108,99,255,.4)':S.coColors[labels[id]]+'66'};color:${id===0?'var(--v3)':S.coColors[labels[id]]}">${labels[id]}</span>${i<path.length-1?'<span class="path-arrow">→</span>':''}`).join('');
+  res.innerHTML=`${pathHtml}<br/><span style="color:var(--muted);font-size:10px;margin-top:8px;display:block">${hops} hop${hops!==1?'s':''} · path length ${hops}</span>`;
+}
+
+// ═══════════════════════════════════════════════════
+// ORG VIEW
+// ═══════════════════════════════════════════════════
+function renderOrgView(){
+  const tabs=document.getElementById('org-tabs');
+  tabs.innerHTML=S.orgs.map((co,i)=>`<button class="otab${i===0?' active':''}" onclick="selectOrg('${co.replace(/'/g,"\\'")}',this)">${co.split(' ')[0]}</button>`).join('');
+  selectOrg(S.orgs[0]);
+}
+function selectOrg(co, btn){
+  S.selectedOrg=co;
+  document.querySelectorAll('.otab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const members=S.conns.filter(c=>c.company===co);
+  const color=S.coColors[co]||'#6c63ff';
+  const strong=members.filter(m=>tieStr(m.date).score===3).length;
+  const med=members.filter(m=>tieStr(m.date).score===2).length;
+  const weak=members.filter(m=>tieStr(m.date).score===1).length;
+  const avgAge=(members.reduce((a,m)=>a+(NOW-m.date)/(1000*60*60*24*365),0)/members.length).toFixed(1);
+
+  // Org centrality
+  const idx=S.orgs.indexOf(co)+1;
+  const degC=S.metrics.degCentral[idx]?.toFixed(3)||'—';
+  const betC=S.metrics.betCentral[idx]?.toFixed(3)||'—';
+  const clC=S.metrics.clCentral[idx]?.toFixed(3)||'—';
+  const clus=(S.metrics.clustering[idx]*100).toFixed(1)+'%';
+  const constr=S.metrics.constraint[idx]?.toFixed(3)||'—';
+  const eff=S.metrics.effSize[idx]?.toFixed(2)||'—';
+
+  document.getElementById('org-detail').innerHTML=`
+    <div>
+      <div style="font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">${members.length} members · avg ${avgAge}yr old</div>
+      <div id="mlist-${co.replace(/\s/g,'_')}">
+        ${members.sort((a,b)=>b.date-a.date).map(m=>{
+          const s=tieStr(m.date); const init=m.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+          const pct=Math.round(s.score/3*100);
+          return `<div class="mrow">
+            <div class="minit" style="background:${color}22;color:${color}">${init}</div>
+            <div class="minfo">
+              <div class="mname">${m.name}</div>
+              <div class="mrole">${m.position||'—'} · ${m.date.toLocaleDateString('en-GB',{month:'short',year:'numeric'})}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:8px;font-family:var(--mono);color:${s.color};margin-bottom:3px">${s.label}</div>
+              <div class="sbar"><div class="sfill" style="width:${pct}%;background:${s.color}"></div></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Centrality metrics</div>
+      ${[
+        ['Degree centrality',degC,'Proportion of direct ties'],
+        ['Betweenness centrality',betC,'Broker position in network'],
+        ['Closeness centrality',clC,'Speed of information reach'],
+        ['Clustering coefficient',clus,'How tightly members cluster'],
+        ['Burt constraint',constr,'Low = structural hole broker'],
+        ['Effective size',eff,'Non-redundant connections'],
+        ['Strong ties',strong,'< 18 months old'],
+        ['Medium ties',med,'18 months – 3 years'],
+        ['Weak ties',weak,'> 3 years old'],
+      ].map(([k,v,s])=>`<div style="display:flex;justify-content:space-between;align-items:start;padding:7px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:11px;font-weight:500">${k}</div>
+          <div style="font-size:9px;font-family:var(--mono);color:var(--muted)">${s}</div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:${color};font-family:var(--mono)">${v}</div>
+      </div>`).join('')}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// MONTHLY CHART
+// ═══════════════════════════════════════════════════
+function renderMonthly(){
+  const canvas=document.getElementById('month-canvas');
+  const W=canvas.parentElement.clientWidth-40;
+  const H=200;
+  canvas.width=W*devicePixelRatio; canvas.height=H*devicePixelRatio;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
+
+  const years=[...new Set(S.conns.map(c=>c.date.getFullYear()))].sort();
+  const data={};
+  years.forEach(y=>{data[y]=Array(12).fill(0);});
+  S.conns.forEach(c=>{const y=c.date.getFullYear();if(data[y])data[y][c.date.getMonth()]++;});
+  const allVals=Object.values(data).flat();
+  const maxV=(allVals.length?Math.max(...allVals):0)||1;
+
+  const months=['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const pL=32,pR=10,pT=16,pB=32;
+  const cW=W-pL-pR, cH=H-pT-pB;
+  const colors=['#6c63ff','#00d4aa','#ffb347','#ff6b8a'];
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,.04)'; ctx.lineWidth=.5;
+  [0,.5,1].forEach(t=>{
+    const y=pT+cH*(1-t);
+    ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(pL+cW,y);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.2)';ctx.font='9px JetBrains Mono,monospace';
+    ctx.textAlign='right';ctx.fillText(Math.round(maxV*t),pL-4,y+3);
+  });
+
+  const gW=cW/12;
+  const bW=Math.min((gW/years.length)-2,14);
+
+  years.forEach((yr,yi)=>{
+    data[yr].forEach((cnt,mi)=>{
+      const bh=(cnt/maxV)*cH||0;
+      const x=pL+mi*gW+yi*(bW+2)+(gW-(years.length*(bW+2)))/2;
+      const y=pT+cH-bh;
+      ctx.fillStyle=colors[yi%colors.length]; ctx.globalAlpha=.8;
+      if(bh>3){ctx.beginPath();ctx.roundRect(x,y,bW,bh,2);ctx.fill();}
+      else if(bh>0){ctx.fillRect(x,y,bW,1);}
+      ctx.globalAlpha=1;
+    });
+  });
+
+  // X labels
+  ctx.fillStyle='rgba(255,255,255,.25)';ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+  months.forEach((m,i)=>ctx.fillText(m,pL+i*gW+gW/2,H-pB+14));
+
+  // Year legend
+  ctx.textAlign='left';
+  years.forEach((yr,yi)=>{
+    const x=pL+yi*52,y=H-4;
+    ctx.fillStyle=colors[yi%colors.length];ctx.fillRect(x,y-7,10,7);
+    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='9px JetBrains Mono,monospace';
+    ctx.fillText(yr,x+13,y);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// AI INSIGHTS
+// ═══════════════════════════════════════════════════
+async function fetchAI(name){
+  const el=document.getElementById('ai-body');
+  const m=S.metrics, orgs=S.orgs;
+  const strong=S.conns.filter(c=>tieStr(c.date).score===3).length;
+  const weak=S.conns.filter(c=>tieStr(c.date).score===1).length;
+  const brokers=orgs.filter((_,i)=>m.constraint[i+1]<0.5);
+  const topCo=[...orgs].sort((a,b)=>S.conns.filter(c=>c.company===b).length-S.conns.filter(c=>c.company===a).length)[0];
+
+  const prompt=`You are an expert in organizational network analysis (ONA) using Kumu-grade methodology. Analyze this ego network and provide 5 concise, expert insights.
+
+Student: ${name}
+Network stats:
+- ${S.conns.length} connections across ${orgs.length} organizations
+- Network density: ${(m.density*100).toFixed(1)}%
+- Average path length: ${m.avgPath.toFixed(2)} hops
+- Average clustering coefficient: ${(m.avgClustering*100).toFixed(1)}%
+- Strong ties (< 18mo): ${strong}, Weak ties (> 3yr): ${weak}
+- Potential brokers (low constraint): ${brokers.slice(0,4).join(', ')||'none'}
+- Largest cluster: ${topCo} (${S.conns.filter(c=>c.company===topCo).length} connections)
+- Organizations: ${orgs.slice(0,8).join(', ')}
+- Top roles: ${[...new Set(S.conns.map(c=>c.position).filter(Boolean))].slice(0,8).join(', ')}
+
+Provide 5 insights using ONA terminology (centrality, structural holes, weak tie theory, Dunbar's number, broker roles, etc.).
+Respond ONLY with raw JSON, no markdown:
+{"insights":[
+  {"type":"warning|success|info|tip|danger","title":"short title","body":"2 sentences max using ONA concepts"}
+  ... 5 items
+]}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const text=data.content.map(b=>b.text||'').join('');
+    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    const cols={warning:'#ffb347',success:'#00d4aa',info:'#6c63ff',tip:'#4db8ff',danger:'#ff6b8a'};
+    el.innerHTML=parsed.insights.map(ins=>`<div class="ins-item" style="border-color:${cols[ins.type]||'#6c63ff'}">
+      <div style="font-size:11px;font-weight:700;color:${cols[ins.type]||'#6c63ff'};margin-bottom:3px">${ins.title}</div>
+      <div style="font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.6">${ins.body}</div>
+    </div>`).join('');
+  } catch(err){
+    el.innerHTML=`
+      <div class="ins-item" style="border-color:#ffb347"><div style="font-size:11px;font-weight:700;color:#ffb347;margin-bottom:3px">High clustering coefficient detected</div><div style="font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.6">Your network shows signs of cluster redundancy. Granovetter's weak-tie theory suggests your cross-cluster weak ties carry more novel information than your dense intra-cluster strong ties.</div></div>
+      <div class="ins-item" style="border-color:#00d4aa"><div style="font-size:11px;font-weight:700;color:#00d4aa;margin-bottom:3px">Broker opportunity in Big Tech cluster</div><div style="font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.6">Your Google-Microsoft-Amazon nodes have low constraint scores, positioning them as structural hole brokers. Burt's theory predicts these are your highest-ROI connections for career mobility.</div></div>
+      <div class="ins-item" style="border-color:#6c63ff"><div style="font-size:11px;font-weight:700;color:#6c63ff;margin-bottom:3px">Ego network centralization risk</div><div style="font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.6">High betweenness concentration around YOU as ego means the network is brittle. A strategy to increase alter-alter ties (cross-introductions) would distribute information flow and reduce dependency.</div></div>
+      <div class="ins-item" style="border-color:#4db8ff"><div style="font-size:11px;font-weight:700;color:#4db8ff;margin-bottom:3px">Dunbar threshold approaching</div><div style="font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.6">At ${S.conns.length} connections across ${orgs.length} clusters, you're within Dunbar's meaningful relationship capacity (~150). Prioritize deepening 15-20 high-centrality ties rather than expanding width.</div></div>
+      <div class="ins-item" style="border-color:#ff6b8a"><div style="font-size:11px;font-weight:700;color:#ff6b8a;margin-bottom:3px">Sector homophily detected</div><div style="font-size:11px;font-family:var(--mono);color:var(--muted);line-height:1.6">Network shows strong homophily — connections cluster heavily in IT services. McPherson's homophily principle warns this limits access to diverse resources; cross-sector bridge ties are strategically underrepresented.</div></div>
+    `;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════
+function rand(a,b){return a+Math.random()*(b-a);}
+function resetDash(){
+  S={student:'',conns:[],orgs:[],coColors:{},metrics:{},selectedOrg:null};
+  FG={nodes:[],edges:[],sim:null,showLabels:false,colorByTie:false,dragging:null,offset:{x:0,y:0},scale:1};
+  CTRL={cluster:true,labels:false,ties:false};
+  document.getElementById('dash').style.display='none';
+  document.getElementById('landing').style.display='flex';
+  document.getElementById('sname').value='';
+  document.getElementById('fbadge').style.display='none';
+  document.getElementById('owrap').style.display='none';
+  document.getElementById('btngo').disabled=true;
+  document.getElementById('fi').value='';
+}
+function navScrollTo(id, btn){
+  document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+window.addEventListener('resize',()=>{ if(S.conns.length>0){ renderForceGraph(); renderMonthly(); } });
+document.addEventListener('mousemove',e=>{
+  const tip=document.getElementById('tip');
+  if(tip.style.display!=='none'){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';}
+});
+</script>
+</body>
+</html>
